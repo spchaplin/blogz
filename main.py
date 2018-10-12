@@ -30,8 +30,9 @@ def index():
 
     #tasks = Task.query.filter_by(completed=False).all()
     posts = Blog.query.all()
+    page_title = "Scott's Blog"
     #completed_tasks = Task.query.filter_by(completed=True).all()
-    return render_template('posts.html', posts=posts)
+    return render_template('posts.html', posts=posts, page_title=page_title)
 
 # @app.route('/delete-task', methods=['POST'])
 # def delete_task():
