@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>My Blog</h1>
+<form method='post'>
+    <h2>Add a blog post below.</h2>
+    <label>
+        Post title:<br>
+        <input type="text" name='post_title' /><br>
+    </label>
+    <label>
+        Post body content:<br>
+        <textarea name="post_content"></textarea><br>
+    </label>
+    <input type="submit" value='Add Post' />
+</form>
+
+<hr />
+
+{% if posts|length == 0 %}
+<p>No posts yet</p>
+{% else %}
+
+<ul>
+    {% for post in posts %}
+    <li><h3>{{post.post_title}}</h3>
+        <p>{{post.post_content}}</p>
+    </li>
+    {% endfor %}
+</ul>
+
+{% endif %}
+
+<hr />
+
+{% endblock %}
