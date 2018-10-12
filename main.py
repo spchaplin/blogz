@@ -17,9 +17,17 @@ class Blog(db.Model):
         self.post_title = post_title
         self.post_content = post_content
 
-@app.route('/', methods=['POST', 'GET'])
-def index():
+page_title = "Scott's Blog"
 
+@app.route('/blog')
+def index():
+    #tasks = Task.query.filter_by(completed=False).all()
+    posts = Blog.query.all()
+    #completed_tasks = Task.query.filter_by(completed=True).all()
+    return render_template('posts.html', posts=posts, page_title=page_title)
+
+@app.route('/newpost', methods=['GET', 'POST'])
+def newpost():
     if request.method == 'POST':
         post_title = request.form['post_title']
         post_content = request.form['post_content']
@@ -27,12 +35,8 @@ def index():
         new_post = Blog(post_title, post_content)
         db.session.add(new_post)
         db.session.commit()
-
-    #tasks = Task.query.filter_by(completed=False).all()
-    posts = Blog.query.all()
-    page_title = "Scott's Blog"
-    #completed_tasks = Task.query.filter_by(completed=True).all()
-    return render_template('posts.html', posts=posts, page_title=page_title)
+        return redirect('/blog')
+    return render_template('newpost.html', page_title=page_title)
 
 # @app.route('/delete-task', methods=['POST'])
 # def delete_task():

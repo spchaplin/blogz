@@ -24,12 +24,16 @@
             width:40%;
             min-width: 250px;
         }
+        .newpost {
+            margin-left: 15px;
+        }
         </style>
     </head>
 <body>
     <h1>{{page_title}}</h1>
+    <a href="/blog">Main - Posts List Page</a>
+    <a href="/newpost" class="newpost">Create New Post</a>
     {% block content %}
     {% endblock %}
-
 </body>
 </html>
