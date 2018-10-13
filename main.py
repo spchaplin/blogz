@@ -17,23 +17,28 @@ class Blog(db.Model):
         self.post_title = post_title
         self.post_content = post_content
 
-page_title = "Scott's Blog"
-
 @app.route('/blog')
 def index():
 
     id = request.args.get('id')
 
     if id:
+        page_title = "Single Post"
         #if post id in parameters, render that post's page
-        return render_template('onepost.html')
+        #completed_tasks = Task.query.filter_by(completed=True).all()
+        single_post = Blog.query.filter_by(id=id).first()
+        single_post_title = single_post.post_title
+        single_post_content = single_post.post_content
+        return render_template('onepost.html', page_title=page_title, single_post_title=single_post_title, single_post_content=single_post_content)
     else:
+        page_title = "Main - Posts List"
         #list all the blog posts
         posts = Blog.query.all()
         return render_template('posts.html', posts=posts, page_title=page_title)
 
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
+    page_title = "Post Entry"
     if request.method == 'POST':
         ### form validation ###
         is_valid_form = True
