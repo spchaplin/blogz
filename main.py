@@ -21,11 +21,9 @@ class Blog(db.Model):
 def index():
 
     id = request.args.get('id')
-
     if id:
         page_title = "Single Post"
         #if post id in parameters, render that post's page
-        #completed_tasks = Task.query.filter_by(completed=True).all()
         single_post = Blog.query.filter_by(id=id).first()
         single_post_title = single_post.post_title
         single_post_content = single_post.post_content
@@ -60,11 +58,12 @@ def newpost():
             return redirect('/newpost?post_title={post_title}&post_content={post_content}&post_title_error={post_title_error}&post_content_error={post_content_error}'.format(post_title=post_title, post_content=post_content,post_title_error=post_title_error, post_content_error=post_content_error))
         ### end form validation ###
 
-        #if form is valid, write record to db and redirect to main post list page...
+        #if form is valid, write record to db and redirect to this new post's page...
         new_post = Blog(post_title, post_content)
         db.session.add(new_post)
         db.session.commit()
-        return redirect('/blog')
+        new_post_id = new_post.id
+        return redirect('/blog?id={new_post_id}'.format(new_post_id=new_post_id))
     
     #if form is not being posted, render form as get request...
     post_title = request.args.get('post_title')
