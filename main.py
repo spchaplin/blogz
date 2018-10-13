@@ -21,33 +21,55 @@ page_title = "Scott's Blog"
 
 @app.route('/blog')
 def index():
-    #tasks = Task.query.filter_by(completed=False).all()
     posts = Blog.query.all()
-    #completed_tasks = Task.query.filter_by(completed=True).all()
     return render_template('posts.html', posts=posts, page_title=page_title)
 
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
     if request.method == 'POST':
+        ### form validation ###
+        is_valid_form = True
         post_title = request.form['post_title']
         post_content = request.form['post_content']
-       # new_task = Task(task_name)
+        if post_title == '':
+            post_title_error = 'Please enter a post title.'
+            is_valid_form = False
+        else:
+            #varialble must have some value b/f refrenced
+            post_title_error = ''
+        if post_content == '':
+            post_content_error = 'Please enter some post content.'
+            is_valid_form = False
+        else:
+            post_content_error = ''
+        if not is_valid_form:
+            #get request
+            return redirect('/newpost?post_title={post_title}&post_content={post_content}&post_title_error={post_title_error}&post_content_error={post_content_error}'.format(post_title=post_title, post_content=post_content,post_title_error=post_title_error, post_content_error=post_content_error))
+        ### end form validation ###
+
+        #if form is valid, write record to db and redirect to main post list page...
         new_post = Blog(post_title, post_content)
         db.session.add(new_post)
         db.session.commit()
         return redirect('/blog')
-    return render_template('newpost.html', page_title=page_title)
+    
+    #if form is not being posted, render form as get request...
+    post_title = request.args.get('post_title')
+    post_content = request.args.get('post_content')
+    post_title_error = request.args.get('post_title_error')
+    post_content_error = request.args.get('post_content_error')
 
-# @app.route('/delete-task', methods=['POST'])
-# def delete_task():
+    if not post_title:
+        # prevents 'None' from displaying for null value
+        post_title = ''
+    if not post_content:
+        post_content = ''
+    if not post_title_error:
+        post_title_error = ''
+    if not post_content_error:
+        post_content_error = ''
 
-#     task_id = int(request.form['task-id'])
-#     task = Task.query.get(task_id)
-#     task.completed = True
-#     db.session.add(task)
-#     db.session.commit()
-
-#     return redirect('/')
+    return render_template('newpost.html', page_title=page_title, post_title=post_title, post_content=post_content, post_title_error=post_title_error, post_content_error=post_content_error)
 
 if __name__ == '__main__':
     app.run()

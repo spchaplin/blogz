@@ -1,17 +1,17 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
 <form method='post'>
     <h2>Add a blog post below.</h2>
     <label>
         Post title:<br>
-        <input class="post_title" type="text" name='post_title' /><br>
+        <input class='post_title' type='text' name='post_title' value='{{post_title}}' placeholder='{{post_title_error}}' /><br>
     </label>
     <label>
         Post body content:<br>
-        <textarea name="post_content"></textarea><br>
+        <textarea name='post_content' placeholder='{{post_content_error}}'>{{post_content}}</textarea><br>
     </label>
-    <input type="submit" value='Add Post' />
+    <input type='submit' value='Add Post' />
 </form>
 
 {% endblock %}
