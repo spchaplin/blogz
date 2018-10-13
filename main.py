@@ -21,8 +21,16 @@ page_title = "Scott's Blog"
 
 @app.route('/blog')
 def index():
-    posts = Blog.query.all()
-    return render_template('posts.html', posts=posts, page_title=page_title)
+
+    id = request.args.get('id')
+
+    if id:
+        #if post id in parameters, render that post's page
+        return render_template('onepost.html')
+    else:
+        #list all the blog posts
+        posts = Blog.query.all()
+        return render_template('posts.html', posts=posts, page_title=page_title)
 
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
