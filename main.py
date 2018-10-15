@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:@localhost:3306/build-a-blog'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:@localhost:3306/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
@@ -11,11 +11,24 @@ class Blog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     post_title = db.Column(db.String(300))
-    post_content = db.Column(db.String(50000))  
+    post_content = db.Column(db.String(50000))
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))  
 
-    def __init__(self, post_title, post_content):
+    def __init__(self, post_title, post_content, owner):
         self.post_title = post_title
         self.post_content = post_content
+        self.owner = owner
+
+class User(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))
+    blogs = db.relationship('Blog', backref='owner')
+
+    def __init__(self, email, password):
+        self.email = email
+        self.password = password
 
 @app.route('/blog')
 def index():
@@ -59,7 +72,9 @@ def newpost():
         ### end form validation ###
 
         #if form is valid, write record to db and redirect to this new post's page...
-        new_post = Blog(post_title, post_content)
+        #setup owner variable later
+        owner=""
+        new_post = Blog(post_title, post_content, owner)
         db.session.add(new_post)
         db.session.commit()
         new_post_id = new_post.id
