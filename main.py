@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -6,6 +6,9 @@ app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:@localhost:3306/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
+app.secret_key = 'd+(yL5}5t|^|J69!k2.Q'
+
+### classes - db table and column setup
 
 class Blog(db.Model):
 
@@ -22,13 +25,182 @@ class Blog(db.Model):
 class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True)
+    username = db.Column(db.String(120), unique=True)
     password = db.Column(db.String(120))
     blogs = db.relationship('Blog', backref='owner')
 
-    def __init__(self, email, password):
-        self.email = email
+    def __init__(self, username, password):
+        self.username = username
         self.password = password
+
+### routes
+
+# login page - get request - initial form render or rerender on error
+@app.route("/login")
+def login():
+    page_title = "Login"
+    username = request.args.get("username")
+    username_format_error = request.args.get("username_format_error")
+    pw1_format_error = request.args.get("pw1_format_error")
+
+    if not username:
+        # prevents "None" from displaying for null value
+        username = ""
+
+    if not username_format_error:
+        username_format_error = ""
+    else:
+        # if error with username, reset the field
+        username = ""
+
+    if not pw1_format_error:
+        pw1_format_error = ""
+    
+    return render_template('login.html', page_title=page_title, username=username, username_format_error=username_format_error, pw1_format_error=pw1_format_error)
+
+# success page - get request
+# @app.route("/welcome")
+# def welcome():
+#     username = request.args.get("username")
+#     page_title = "Welcome!"
+#     return render_template('welcome.html', username=username, page_title=page_title)
+
+# handle posted login form
+
+@app.route("/login", methods=['POST'])
+# logic for form validation below
+def validate_login():
+    is_valid_form = True
+    # anything that invalidates form goes below...
+    username = request.form['username']
+    pw1 = request.form['password']
+
+    # test for valid username
+    if " " in username or len(username) < 3 or len(username) > 20:
+        is_valid_form = False
+        username_format_error = "Usernames must be 3 to 20 characters, and cannot include spaces."
+    else:
+        # must have some value to use as arg for str.format() later
+        username_format_error = ""
+
+    # test pw1 format
+    if " " in pw1 or len(pw1) < 3 or len(pw1) > 20:
+        is_valid_form = False
+        pw1_format_error = "Passwords must be 3 to 20 characters, and cannot include spaces."
+    else:
+        pw1_format_error = ""
+
+    # based on boolean value set above in conditionals...
+    if is_valid_form:
+        # get request
+        return redirect("/newpost?username={0}".format(username))
+    else:
+        # get request
+        return redirect("/login?username={username}&username_format_error={username_format_error}&pw1_format_error={pw1_format_error}".format(username=username, username_format_error=username_format_error, pw1_format_error=pw1_format_error))
+
+# signup page - get request - initial form render or rerender on error
+@app.route("/signup")
+def signup():
+    page_title = "Signup"
+    username = request.args.get("username")
+    username_format_error = request.args.get("username_format_error")
+    pw1_format_error = request.args.get("pw1_format_error")
+    pw2_format_error = request.args.get("pw2_format_error")
+    pw_match_error = request.args.get("pw_match_error")
+    existing_user_error = request.args.get("existing_user_error")
+
+    if not username:
+        # prevents "None" from displaying for null value
+        username = ""
+
+    if not username_format_error:
+        username_format_error = ""
+    else:
+        # if error with username, reset the field
+        username = ""
+
+    if not existing_user_error:
+        existing_user_error = ""
+    else:
+        username = ""
+
+    if not pw1_format_error:
+        pw1_format_error = ""
+    if not pw2_format_error:
+        pw2_format_error = ""
+    if not pw_match_error:
+        pw_match_error = ""
+    return render_template('signup.html', page_title=page_title, username=username, username_format_error=username_format_error, pw1_format_error=pw1_format_error, pw2_format_error=pw2_format_error, pw_match_error=pw_match_error, existing_user_error=existing_user_error)
+
+# handle posted login form
+
+@app.route("/signup", methods=['POST'])
+# logic for form validation below
+def validate_signup():
+    is_valid_form = True
+    # anything that invalidates form goes below...
+    username = request.form['username']
+    pw1 = request.form['password']
+    pw2 = request.form['re_enter_password']
+
+    # test for valid username
+    if " " in username or len(username) < 3 or len(username) > 20:
+        is_valid_form = False
+        username_format_error = "Usernames must be 3 to 20 characters, and cannot include spaces."
+    else:
+        # must have some value to use as arg for str.format() later
+        username_format_error = ""
+
+    # test pw1 format
+    if " " in pw1 or len(pw1) < 3 or len(pw1) > 20:
+        is_valid_form = False
+        pw1_format_error = "Passwords must be 3 to 20 characters, and cannot include spaces."
+    else:
+        pw1_format_error = ""
+    # test pw2 format
+    if " " in pw2 or len(pw2) < 3 or len(pw2) > 20:
+        is_valid_form = False
+        pw2_format_error = "Passwords must be 3 to 20 characters, and cannot include spaces."
+    else:
+        pw2_format_error = ""
+    # test pw match format
+    if pw1 != pw2:
+        is_valid_form = False
+        pw_match_error = "Passwords must match."
+    else:
+        pw_match_error = ""
+
+    # test for existing user
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        existing_user_error = "You entered an existing user. Please enter a unique username"
+
+    # existing_user = User.query.filter_by(email=email).first()
+    #     if not existing_user:
+    #         new_user = User(email, password)
+    #         db.session.add(new_user)
+    #         db.session.commit()
+    #         session['email'] = email
+    #         return redirect('/')
+    #     else:
+    #         # TODO - user better response messaging
+    #         return "<h1>Duplicate user</h1>"
+
+
+    # based on values determined above...
+   
+    # add user to db and session 
+    if is_valid_form and not existing_user:
+        new_user = User(username, pw1)
+        db.session.add(new_user)
+        db.session.commit()
+        session['username'] = username
+    
+        # get request
+        return redirect("/newpost?username={0}".format(username))
+    else:
+        # get request - rerender the form
+        return redirect("/signup?username={username}&username_format_error={username_format_error}&pw1_format_error={pw1_format_error}&pw2_format_error={pw2_format_error}&pw_match_error={pw_match_error}&existing_user_error={existing_user_error}".format(username=username,username_format_error=username_format_error, pw1_format_error=pw1_format_error, pw2_format_error=pw2_format_error, pw_match_error=pw_match_error, existing_user_error=existing_user_error))
 
 @app.route('/blog')
 def index():

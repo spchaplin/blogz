@@ -2,6 +2,8 @@
 <html>
     <head>
         <title>{{page_title}}</title>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href='https://fonts.googleapis.com/css?family=Domine|Open+Sans' rel='stylesheet'>
         <style>
         body{
@@ -24,15 +26,67 @@
             width:40%;
             min-width: 250px;
         }
-        .newpost {
+        .top_links_container {
+            margin-bottom:30px;
+        }
+        .all_posts_link, .newpost_link, .logout_link{
             margin-left: 15px;
+        }
+        .spacer {
+            margin-left: 30px;
+        }
+        label {
+            display: block;
+        }
+        .text-input {
+            padding: 5px;
+            font-size: 16px;
+            border-radius: 3px;
+            border: 1px solid gray;
+        }
+        .username {
+            margin-left: 41px;
+        }
+        .pw1 {
+        margin-left: 46px;
+        }
+        .email {
+        margin-left: 78px;
+        }
+        .button {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-left: 85px;
+            border-radius: 3px;
+            padding: 5px 10px;
+            font-size: 16px;
+        }
+
+        .error {
+            color: #ff0080;
+        }
+
+        .asterisk {
+            color: #ff0080;
+            font-size: 20px;
+        }
+        .no_account {
+            margin-top: 20px;
         }
         </style>
     </head>
 <body>
     <h1>{{page_title}}</h1>
-    <a href='/blog'>Main - Posts List Page</a>
-    <a href='/newpost' class='newpost'>Create New Post</a>
+    <div class='top_links_container'>
+    <a href='/' class='user_list_link top_links'>Main-User List</a>
+    <a href='/blog' class='all_posts_link top_links'>All Posts</a>
+    <a href='/newpost' class='newpost_link top_links'>New Post</a>
+    <span class="spacer"></span>
+    <span class="pipe">|</span>
+    <span class="spacer"></span>
+    <a href='/login' class='login_link top_links'>Login</a>
+    <a href='/logout' class='logout_link top_links'>Logout</a>
+    </div>
     {% block content %}
     {% endblock %}
 </body>

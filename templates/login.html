@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post">
+    <label>Username:
+        <input type="text" class="text-input username" name="username" value="{{username}}"><span class="asterisk"> *</span>
+    </label>
+    <p class="error">{{username_format_error}}</p>
+    {% if username_format_error|length > 0 %}
+    <style>
+        .username {
+            background:#ffff80;
+        }
+        </style>
+    {% endif %}
+    <label>Password:
+        <input class="text-input pw1" type="password" name="password"><span class="asterisk"> *</span>
+    </label>
+    <p class="error">{{pw1_format_error}}</p>
+    {% if pw1_format_error|length > 0 %}
+    <style>
+        .pw1 {
+                    background:#ffff80;
+            }
+        </style>
+    {% endif %}
+    <input class="button" type="submit" value="Login">
+</form>
+
+<p><span class="no_account">Don't have an account?&nbsp;&nbsp;</span><a href="/signup">Create an account</a>.</p>
+{% endblock %}
