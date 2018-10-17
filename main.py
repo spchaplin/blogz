@@ -35,6 +35,13 @@ class User(db.Model):
 
 ### routes
 
+# @app.before_request
+# def require_login():
+#     allowed_routes = ['login', 'signup', '/']
+#     if request.endpoint not in allowed_routes and 'username' not in session:
+#         return redirect('/login')
+
+
 # login page - get request - initial form render or rerender on error
 @app.route("/login")
 def login():
@@ -42,10 +49,16 @@ def login():
     username = request.args.get("username")
     username_format_error = request.args.get("username_format_error")
     pw1_format_error = request.args.get("pw1_format_error")
+    username_exists_error = request.args.get("username_exists_error")
+    wrong_pw_error = request.args.get("wrong_pw_error")
 
     if not username:
         # prevents "None" from displaying for null value
         username = ""
+
+    if not username_exists_error:
+        # prevents "None" from displaying for null value
+        username_exists_error = ""
 
     if not username_format_error:
         username_format_error = ""
@@ -53,10 +66,13 @@ def login():
         # if error with username, reset the field
         username = ""
 
+    if not wrong_pw_error:
+        wrong_pw_error = ""
+
     if not pw1_format_error:
         pw1_format_error = ""
     
-    return render_template('login.html', page_title=page_title, username=username, username_format_error=username_format_error, pw1_format_error=pw1_format_error)
+    return render_template('login.html', page_title=page_title, username=username, username_exists_error=username_exists_error, username_format_error=username_format_error, wrong_pw_error=wrong_pw_error, pw1_format_error=pw1_format_error)
 
 # success page - get request
 # @app.route("/welcome")
@@ -74,8 +90,28 @@ def validate_login():
     # anything that invalidates form goes below...
     username = request.form['username']
     pw1 = request.form['password']
+    user_stored = User.query.filter_by(username=username).first()
 
-    # test for valid username
+    # test that username in db
+    if not user_stored:
+        is_valid_form = False
+        username_exists_error = "Username does not exist."
+    else:
+        username_exists_error = ""
+
+    # test that password is correct
+    if user_stored:
+        correct_password = user_stored.password
+        if pw1 != correct_password:
+            is_valid_form = False
+            wrong_pw_error = "The password for this user is incorrect."
+        else:
+            wrong_pw_error = ""
+    else:
+        #user is not in db
+        wrong_pw_error = ""
+
+    # test for valid username format
     if " " in username or len(username) < 3 or len(username) > 20:
         is_valid_form = False
         username_format_error = "Usernames must be 3 to 20 characters, and cannot include spaces."
@@ -93,10 +129,11 @@ def validate_login():
     # based on boolean value set above in conditionals...
     if is_valid_form:
         # get request
+        session['username'] = username
         return redirect("/newpost?username={0}".format(username))
     else:
         # get request
-        return redirect("/login?username={username}&username_format_error={username_format_error}&pw1_format_error={pw1_format_error}".format(username=username, username_format_error=username_format_error, pw1_format_error=pw1_format_error))
+        return redirect("/login?username={username}&username_exists_error={username_exists_error}&username_format_error={username_format_error}&wrong_pw_error={wrong_pw_error}&pw1_format_error={pw1_format_error}".format(username=username, username_exists_error=username_exists_error, username_format_error=username_format_error, wrong_pw_error=wrong_pw_error,pw1_format_error=pw1_format_error))
 
 # signup page - get request - initial form render or rerender on error
 @app.route("/signup")
@@ -171,21 +208,12 @@ def validate_signup():
         pw_match_error = ""
 
     # test for existing user
+  
     existing_user = User.query.filter_by(username=username).first()
     if existing_user:
-        existing_user_error = "You entered an existing user. Please enter a unique username"
-
-    # existing_user = User.query.filter_by(email=email).first()
-    #     if not existing_user:
-    #         new_user = User(email, password)
-    #         db.session.add(new_user)
-    #         db.session.commit()
-    #         session['email'] = email
-    #         return redirect('/')
-    #     else:
-    #         # TODO - user better response messaging
-    #         return "<h1>Duplicate user</h1>"
-
+        existing_user_error = "You entered an existing user. Please enter a unique username."
+    else:
+        existing_user_error = ""
 
     # based on values determined above...
    
