@@ -130,6 +130,7 @@ def validate_login():
     if is_valid_form:
         # get request
         session['username'] = username
+        flash("Welcome, you successfully logged in.", "status")
         return redirect("/newpost?username={0}".format(username))
     else:
         # get request
@@ -223,7 +224,8 @@ def validate_signup():
         db.session.add(new_user)
         db.session.commit()
         session['username'] = username
-    
+        flash("Welcome, you successfully registered and are now logged in.", "status")
+
         # get request
         return redirect("/newpost?username={0}".format(username))
     else:
@@ -297,6 +299,12 @@ def newpost():
         post_content_error = ''
 
     return render_template('newpost.html', page_title=page_title, post_title=post_title, post_content=post_content, post_title_error=post_title_error, post_content_error=post_content_error)
+
+@app.route('/logout')
+def logout():
+    del session['username']
+    flash("Goodbye, you successfully logged out.", "status")
+    return redirect('/blog')
 
 if __name__ == '__main__':
     app.run()

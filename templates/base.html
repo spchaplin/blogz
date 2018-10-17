@@ -35,6 +35,9 @@
         .spacer {
             margin-left: 30px;
         }
+        .flash_messages ul {
+            list-style-type: none;
+        }
         label {
             display: block;
         }
@@ -86,6 +89,15 @@
     <span class="spacer"></span>
     <a href='/login' class='login_link top_links'>Login</a>
     <a href='/logout' class='logout_link top_links'>Logout</a>
+    </div>
+    <div class='flash_messages'>
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        <ul>
+        {% for category,message in messages %}
+        <li class={{category}}>&check;&nbsp;{{message}}</li>
+        {% endfor %}
+        </ul>
+        {% endwith %}
     </div>
     {% block content %}
     {% endblock %}
