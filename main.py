@@ -37,10 +37,9 @@ class User(db.Model):
 
 # @app.before_request
 # def require_login():
-#     allowed_routes = ['login', 'signup', '/']
-#     if request.endpoint not in allowed_routes and 'username' not in session:
+#     restricted_routes = ['newpost']
+#     if request.endpoint in restricted_routes and 'username' not in session:
 #         return redirect('/login')
-
 
 # login page - get request - initial form render or rerender on error
 @app.route("/login")
@@ -73,13 +72,6 @@ def login():
         pw1_format_error = ""
     
     return render_template('login.html', page_title=page_title, username=username, username_exists_error=username_exists_error, username_format_error=username_format_error, wrong_pw_error=wrong_pw_error, pw1_format_error=pw1_format_error)
-
-# success page - get request
-# @app.route("/welcome")
-# def welcome():
-#     username = request.args.get("username")
-#     page_title = "Welcome!"
-#     return render_template('welcome.html', username=username, page_title=page_title)
 
 # handle posted login form
 
@@ -275,7 +267,8 @@ def newpost():
 
         #if form is valid, write record to db and redirect to this new post's page...
         #setup owner variable later
-        owner=""
+        #single_post = Blog.query.filter_by(id=id).first()
+        owner = User.query.filter_by(username=session['username']).first()
         new_post = Blog(post_title, post_content, owner)
         db.session.add(new_post)
         db.session.commit()
@@ -302,8 +295,10 @@ def newpost():
 
 @app.route('/logout')
 def logout():
-    del session['username']
-    flash("Goodbye, you successfully logged out.", "status")
+    if 'username' in session:
+        print('username was in session!')
+        del session['username']
+        flash("Goodbye, you successfully logged out.", "status")
     return redirect('/blog')
 
 if __name__ == '__main__':
