@@ -41,6 +41,17 @@ def require_login():
     if request.endpoint in restricted_routes and 'username' not in session:
         return redirect('/login')
 
+# home page - lists all users
+@app.route("/") 
+def bloggers():
+    # render list of all bloggers
+    print("******************************** rendered all bloggers list")
+    page_title = "Bloggers"
+    users = User.query.all()
+    return render_template('index.html', page_title=page_title, users=users)
+        
+    #existing_user = User.query.filter_by(username=username).first()
+
 # login page - get request - initial form render or rerender on error
 @app.route("/login")
 def login():
@@ -226,17 +237,26 @@ def validate_signup():
 
 @app.route('/blog')
 def index():
-
-    id = request.args.get('id')
-    if id:
+    user_id = request.args.get('user')
+    post_id = request.args.get('post_id')
+    print('********************************* user_id is', user_id)
+    if user_id:
+        print("******************************** rendered all posts for chosen user")
+        # if user_id in parameters, render that user's posts
+        user_record = User.query.filter_by(id=user_id).first()
+        username = user_record.username
+        page_title = "{0}'s Blog Posts".format(username)
+        users_posts = Blog.query.filter_by(owner_id=int(user_id)).all()
+        return render_template('all_posts_for_user.html', page_title=page_title, users_posts=users_posts)
+    elif post_id:
         page_title = "Single Post"
         #if post id in parameters, render that post's page
-        single_post = Blog.query.filter_by(id=id).first()
+        single_post = Blog.query.filter_by(id=post_id).first()
         single_post_title = single_post.post_title
         single_post_content = single_post.post_content
         return render_template('onepost.html', page_title=page_title, single_post_title=single_post_title, single_post_content=single_post_content)
     else:
-        page_title = "Main - Posts List"
+        page_title = "All Posts"
         #list all the blog posts
         posts = Blog.query.all()
         return render_template('posts.html', posts=posts, page_title=page_title)
