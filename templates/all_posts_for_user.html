@@ -12,7 +12,7 @@
     {% for post in users_posts %}
     <li><a href='./blog?post_id={{post.id}}'><h3>{{post.post_title}}</h3></a>
         <p>{{post.post_content}}</p>
-        <p>written by <a href='./blog?user={{user_id_int}}'>{{username}}</a></p>
+        <p><span class="arrow">&rarr; </span><i>written by <a href='./blog?user={{user_id_int}}'>{{username}}</a></i></p>
     </li>
     {% endfor %}
 </ul>

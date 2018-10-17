@@ -45,7 +45,7 @@ def require_login():
 @app.route("/") 
 def bloggers():
     # render list of all bloggers
-    page_title = "Bloggers"
+    page_title = "All Bloggers"
     users = User.query.all()
     return render_template('index.html', page_title=page_title, users=users)
 
@@ -66,6 +66,8 @@ def login():
     if not username_exists_error:
         # prevents "None" from displaying for null value
         username_exists_error = ""
+    else:
+        username = ""
 
     if not username_format_error:
         username_format_error = ""
@@ -257,7 +259,13 @@ def index():
         page_title = "All Posts"
         #list all the blog posts
         posts = Blog.query.all()
-        return render_template('posts.html', posts=posts, page_title=page_title)
+        writer_usernames = []
+        for post in posts:
+            username = User.query.get(post.owner_id).username
+            #create array of tuples (username, post_id, owner_id, post_title, post_content)
+            writer_usernames.append((username, post.id, post.owner_id, post.post_title, post.post_content))
+        print(writer_usernames)
+        return render_template('posts.html', posts=posts, page_title=page_title, writer_usernames=writer_usernames)
 
 @app.route('/newpost', methods=['GET', 'POST'])
 def newpost():
@@ -284,8 +292,6 @@ def newpost():
         ### end form validation ###
 
         #if form is valid, write record to db and redirect to this new post's page...
-        #setup owner variable later
-        #single_post = Blog.query.filter_by(id=id).first()
         owner = User.query.filter_by(username=session['username']).first()
         new_post = Blog(post_title, post_content, owner)
         db.session.add(new_post)

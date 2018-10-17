@@ -9,10 +9,11 @@
 {% else %}
 
 <ul>
-    {% for post in posts %}
-    <li><a href='./blog?post_id={{post.id}}'><h3>{{post.post_title}}</h3></a>
-        <p>{{post.post_content}}</p>
-    </li>
+    {% for username,post_id,owner_id,post_title,post_content in writer_usernames %}
+    <li><a href='./blog?post_id={{post_id}}'><h3>{{post_title}}</h3></a>
+        <p>{{post_content}}</p>
+        <p><span class="arrow">&rarr; </span> <i>written by <a href="./blog?user={{owner_id}}">{{username}}</a></i></p>
+    </li>  
     {% endfor %}
 </ul>
 
