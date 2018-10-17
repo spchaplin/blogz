@@ -45,12 +45,9 @@ def require_login():
 @app.route("/") 
 def bloggers():
     # render list of all bloggers
-    print("******************************** rendered all bloggers list")
     page_title = "Bloggers"
     users = User.query.all()
     return render_template('index.html', page_title=page_title, users=users)
-        
-    #existing_user = User.query.filter_by(username=username).first()
 
 # login page - get request - initial form render or rerender on error
 @app.route("/login")
@@ -239,22 +236,23 @@ def validate_signup():
 def index():
     user_id = request.args.get('user')
     post_id = request.args.get('post_id')
-    print('********************************* user_id is', user_id)
     if user_id:
-        print("******************************** rendered all posts for chosen user")
         # if user_id in parameters, render that user's posts
+        user_id_int = int(user_id)
         user_record = User.query.filter_by(id=user_id).first()
         username = user_record.username
         page_title = "{0}'s Blog Posts".format(username)
-        users_posts = Blog.query.filter_by(owner_id=int(user_id)).all()
-        return render_template('all_posts_for_user.html', page_title=page_title, users_posts=users_posts)
+        users_posts = Blog.query.filter_by(owner_id=user_id_int).all()
+        return render_template('all_posts_for_user.html', page_title=page_title, users_posts=users_posts, username=username, user_id_int=user_id_int)
     elif post_id:
         page_title = "Single Post"
         #if post id in parameters, render that post's page
         single_post = Blog.query.filter_by(id=post_id).first()
         single_post_title = single_post.post_title
         single_post_content = single_post.post_content
-        return render_template('onepost.html', page_title=page_title, single_post_title=single_post_title, single_post_content=single_post_content)
+        writer_id = single_post.owner_id
+        writer_username = User.query.get(writer_id).username
+        return render_template('onepost.html', page_title=page_title, single_post_title=single_post_title, single_post_content=single_post_content, writer_id=writer_id, writer_username=writer_username)
     else:
         page_title = "All Posts"
         #list all the blog posts
