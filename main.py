@@ -35,11 +35,11 @@ class User(db.Model):
 
 ### routes
 
-# @app.before_request
-# def require_login():
-#     restricted_routes = ['newpost']
-#     if request.endpoint in restricted_routes and 'username' not in session:
-#         return redirect('/login')
+@app.before_request
+def require_login():
+    restricted_routes = ['newpost']
+    if request.endpoint in restricted_routes and 'username' not in session:
+        return redirect('/login')
 
 # login page - get request - initial form render or rerender on error
 @app.route("/login")
@@ -296,7 +296,6 @@ def newpost():
 @app.route('/logout')
 def logout():
     if 'username' in session:
-        print('username was in session!')
         del session['username']
         flash("Goodbye, you successfully logged out.", "status")
     return redirect('/blog')
